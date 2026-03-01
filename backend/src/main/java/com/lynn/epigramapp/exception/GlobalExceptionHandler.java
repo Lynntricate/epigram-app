@@ -13,8 +13,9 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleUserNotFound(UserNotFoundException ex) {
         return new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
-                ex.getMessage()
-        );
+                ex.getMessage(),
+                ErrorCode.USERNAME_NOT_FOUND
+                );
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
@@ -22,7 +23,8 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleInvalidCredentials(InvalidCredentialsException ex) {
         return new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage()
+                ex.getMessage(),
+                ErrorCode.INCORRECT_PASSWORD
         );
     }
 
@@ -31,7 +33,8 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleUsernameAlreadyExists(UsernameAlreadyExistsException ex) {
         return new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
-                ex.getMessage()
+                ex.getMessage(),
+                ErrorCode.USERNAME_ALREADY_EXISTS
         );
     }
 
@@ -40,7 +43,8 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleInvalidPasswordException(InvalidPasswordException ex) {
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage()
+                ex.getMessage(),
+                ErrorCode.INVALID_PASSWORD
         );
     }
 
@@ -49,7 +53,18 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleMissingAuthorException(MissingAuthorException ex) {
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage()
+                ex.getMessage(),
+                ErrorCode.NO_EPIGRAM_AUTHOR
+        );
+    }
+
+    @ExceptionHandler(InvalidUsernameException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidUsernameException(InvalidUsernameException ex) {
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                ErrorCode.INVALID_USERNAME
         );
     }
 }

@@ -1,13 +1,9 @@
 package com.lynn.epigramapp.controller;
 
 import com.lynn.epigramapp.dto.EpigramDTO;
-import com.lynn.epigramapp.exception.MissingAuthorException;
 import com.lynn.epigramapp.model.Epigram;
-import com.lynn.epigramapp.model.User;
 import com.lynn.epigramapp.service.EpigramService;
-import com.lynn.epigramapp.service.UserService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,34 +13,36 @@ import java.util.List;
 @RequestMapping("/api/epigrams")
 public class EpigramsController {
     private final EpigramService epigramService;
-    private final UserService userService;
 
-    public EpigramsController(EpigramService epigramService, UserService userService) {
+    public EpigramsController(EpigramService epigramService) {
         this.epigramService = epigramService;
-        this.userService = userService;
     }
 
-    @GetMapping
-    public List<Epigram> all() {
-        return epigramService.getAll();
+
+    @GetMapping()
+    public List<EpigramDTO> all() {
+        return epigramService.findAll().stream()
+                .map(e -> new EpigramDTO(
+                        e.getContent(),
+                        e.getAuthor(),
+                        e.isMine()
+                ))
+                .toList();
     }
+
+
 
     @PostMapping
-    public Epigram create(@RequestBody EpigramDTO dto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public EpigramDTO create(@RequestBody EpigramDTO dto) {
+        Epigram saved = epigramService.store(dto);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assert auth != null;
-
-        String username = auth.getName();  // username from JWT
-        User user = userService.findByUsername(username);
-
-        Epigram epigram = new Epigram();
-        epigram.setContent(dto.content());
-        epigram.setAuthor(dto.author());
-        epigram.setMine(dto.mine());
-        epigram.setUser(user);
-        return epigramService.save(epigram, user);
+        // Map entity to DTO
+        return new EpigramDTO(
+                saved.getContent(),
+                saved.getAuthor(),
+                saved.isMine()
+        );
     }
-
 
 }

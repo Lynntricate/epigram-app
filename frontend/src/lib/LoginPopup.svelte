@@ -52,7 +52,11 @@
         } else {
             console.error("Registration failed");
             if (data.status == 400) {
-                passwordError = data.message;
+                if (data.errorCode == "INVALID_USERNAME") {
+                    usernameError = data.message;
+                } else if (data.errorCode == "INVALID_PASSWORD") {
+                    passwordError = data.message;
+                }
             }
             if (data.status == 409) {
                 usernameError = data.message;

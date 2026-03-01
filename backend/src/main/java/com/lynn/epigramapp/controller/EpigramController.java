@@ -1,5 +1,6 @@
 package com.lynn.epigramapp.controller;
 
+import com.lynn.epigramapp.dto.EpigramDTO;
 import com.lynn.epigramapp.model.Epigram;
 import com.lynn.epigramapp.service.EpigramService;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,25 @@ public class EpigramController {
     }
 
     @GetMapping
-    public ResponseEntity<Epigram> getRandom() {
+    public ResponseEntity<EpigramDTO> getRandom() {
         return service.getRandom()
+                .map(epigram -> new EpigramDTO(
+                        epigram.getContent(),
+                        epigram.getAuthor(),
+                        epigram.isMine()
+                ))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Epigram> getById(@PathVariable Long id) {
+    public ResponseEntity<EpigramDTO> getById(@PathVariable Long id) {
         return service.getById(id)
+                .map(epigram -> new EpigramDTO(
+                        epigram.getContent(),
+                        epigram.getAuthor(),
+                        epigram.isMine()
+                ))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }

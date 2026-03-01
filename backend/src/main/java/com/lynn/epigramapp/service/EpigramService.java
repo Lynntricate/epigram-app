@@ -1,10 +1,14 @@
 package com.lynn.epigramapp.service;
 
+import com.lynn.epigramapp.dto.EpigramDTO;
 import com.lynn.epigramapp.exception.MissingAuthorException;
 import com.lynn.epigramapp.model.Epigram;
 import com.lynn.epigramapp.model.User;
 import com.lynn.epigramapp.repository.EpigramRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +26,13 @@ import java.util.Random;
 
 @Service
 public class EpigramService {
-    private final EpigramRepository repository;
+    private final EpigramRepository epigramRepository;
     private final Random random = new Random();
+    private final UserService userService;
 
-    public EpigramService(EpigramRepository repository) {
-        this.repository = repository;
+    public EpigramService(EpigramRepository epigramRepository, UserService userService) {
+        this.epigramRepository = epigramRepository;
+        this.userService = userService;
     }
 
     /**
@@ -34,8 +40,8 @@ public class EpigramService {
      *
      * @return List of Epigram objects
      */
-    public List<Epigram> getAll() {
-        return repository.findAll();
+    public List<Epigram> findAll() {
+        return epigramRepository.findAll();
     }
 
     /**
@@ -45,7 +51,7 @@ public class EpigramService {
      * @return Optional containing the Epigram with the given id if found, empty otherwise
      */
     public Optional<Epigram> getById(Long id) {
-        return repository.findById(id);
+        return epigramRepository.findById(id);
     }
 
     /**
@@ -54,26 +60,44 @@ public class EpigramService {
      * @return Optional containing a random Epigram from the database, empty otherwise
      */
     public Optional<Epigram> getRandom() {
-        List<Epigram> all = repository.findAll();
+        List<Epigram> all = epigramRepository.findAll();
         if (all.isEmpty()) return Optional.empty();
         return Optional.of(all.get(random.nextInt(all.size())));
     }
 
+
     /**
      * Saves an Epigram object to the database.
      *
-     * @param epigram the Epigram to be stored
+     * @param dto the DTO representing the Epigram to be saved
      *
      * @return Epigram object that was stored
      */
-    public Epigram save(Epigram epigram, User user) {
-        if (epigram.isMine()) {
-            epigram.setAuthor(user.getUsername());
+    public Epigram store(EpigramDTO dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        assert auth != null;
+
+        String username = auth.getName(); // Username from JWT
+        User user = userService.findByUsername(username);
+
+        Epigram epigram = new Epigram();
+
+        // Conditionally set the author of an epigram to the username if mine is true,
+        // or to the custom specified author name otherwise
+        if (dto.mine()) {
+            epigram.setAuthor(username);
         } else {
-            if (epigram.getAuthor().isEmpty()) {
+            if (dto.author() == null || dto.author().isEmpty()) {
+                // No custom author and also not marked as "mine" by user: illegal
                 throw new MissingAuthorException();
             }
         }
-        return repository.save(epigram);
+
+        epigram.setContent(dto.content());
+        epigram.setMine(dto.mine());
+        epigram.setUser(user);
+
+        return epigramRepository.save(epigram);
+
     }
 }
