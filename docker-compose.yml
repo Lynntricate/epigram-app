@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: epigram-db
+    restart: always
+    environment:
+      POSTGRES_DB: epigram
+      POSTGRES_USER: epigram
+      POSTGRES_PASSWORD: epigram
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: epigram-backend
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/epigram
+      SPRING_DATASOURCE_USERNAME: epigram
+      SPRING_DATASOURCE_PASSWORD: epigram
+      JWT_SECRET: super-secret-secretive-secret-for-dev-purposes-only-for-demo-purposes-only
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: epigram-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/certs:/app/certs
+
+volumes:
+  db-data:
