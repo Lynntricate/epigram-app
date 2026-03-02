@@ -8,7 +8,7 @@ A full-stack web application for creating and viewing epigrams.
 - Database: PostgreSQL
 
 ## Requirements
-The application can run without Docker, but Docker is strongly recommended for the setup simplicity
+The application can run without Docker, but Docker is strongly recommended for setup simplicity
 - [Docker](https://www.docker.com/get-started) installed and running
 
 ## Starting the Application (Docker)
