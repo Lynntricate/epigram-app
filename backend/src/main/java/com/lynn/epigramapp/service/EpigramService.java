@@ -91,6 +91,7 @@ public class EpigramService {
                 // No custom author and also not marked as "mine" by user: illegal
                 throw new MissingAuthorException();
             }
+            epigram.setAuthor(dto.author());
         }
 
         epigram.setContent(dto.content());

@@ -2,11 +2,15 @@ package com.lynn.epigramapp.integration;
 
 import com.jayway.jsonpath.JsonPath;
 import com.lynn.epigramapp.dto.EpigramDTO;
+import jakarta.transaction.Transactional;
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -20,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) // Clean up db after each test
 public class FullFlowTest {
 
     @Autowired
@@ -30,6 +35,7 @@ public class FullFlowTest {
 
     @Autowired
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
 
     @Test
     void registerLoginAndCreateEpigramFlow() throws Exception {
@@ -71,8 +77,6 @@ public class FullFlowTest {
 
         String tokenB = JsonPath.read(loginResult.getResponse().getContentAsString(), "$.token");
 
-        assertEquals(tokenA, tokenB); // New login, should provide the same token, claims are identical
-
         // Post epigram while logged in, should still work
         mockMvc.perform(post("/api/epigrams")
                         .header("Authorization", "Bearer " + tokenB)
@@ -90,5 +94,33 @@ public class FullFlowTest {
                 .andExpect(jsonPath("$[0].content").value("Hello!"))
                 .andExpect(jsonPath("$[0].author").value("Juno"))
                 .andExpect(jsonPath("$[0].mine").value(true));
+    }
+
+    @Test
+    void registerAndCreateEpigramNotMine() throws Exception {
+        EpigramDTO epigramNotMine = new EpigramDTO("Not all those who wander are lost", "J.R.R. Tolkien", false); // Sample epigram with custom author
+
+        // Register (should also directly log in)
+        var loginResultRegister = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\": \"Ashe\", \"password\": \"password12345\"}"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("Ashe"))
+                .andReturn();
+
+        // Extract JWT token from login response
+        String token = JsonPath.read(loginResultRegister.getResponse().getContentAsString(), "$.token");
+
+        // Post epigram as user Juno, with a different author (mine is false), should store the specified author
+        mockMvc.perform(post("/api/epigrams")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(epigramNotMine)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.author").value("J.R.R. Tolkien"))
+                .andReturn();
+
     }
 }

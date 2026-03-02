@@ -26,10 +26,14 @@
     }
 
 
+    /**
+     * Submit an epigram to the backend. For this action to succeed, a valid authentication token should 
+     * be provided 
+     */
     async function submitEpigram() {
         const token = get(auth_token); // Get token from store
 
-        if (!token) return alert("Not logged in"); // TODO cleaner implementation of this
+        if (!token) return alert("Not logged in");
 
         const epigram = { content, author, mine };
 
@@ -48,7 +52,6 @@
             }
 
             const saved = await response.json();
-            console.log("Saved epigram:", saved);
 
             // Clear form and close popup
             content = "";
