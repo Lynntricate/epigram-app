@@ -12,6 +12,8 @@ The application can run without Docker, but Docker is strongly recommended for t
 - [Docker](https://www.docker.com/get-started) installed and running
 
 ## Starting the Application (Docker)
+Note: The no-docker startup procedure can be found at the end of this file.
+
 Frontend, backend and database are containerized with Docker. To start the app in one command, run the following from the repository root:
 
 ```bash
@@ -27,34 +29,9 @@ The backend can now be reached at http://localhost:8080/
 docker compose down
 ```
 
-## Starting the Application (No Docker)
-### Backend
-* Ensure postgreSQL is installed
-* Export environment variables SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, and SPRING_DATASOURCE_PASSWORD (see src/main/resources/application.properties for usage, and docker-compose.yml for example values)
-* Export environment variable JWT_SECRET, value should be a string of at least 256 bits (length: >= 32)
-* Start backend with:
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-The backend can now be reached at http://localhost:8080/
-
-### Frontend
-* Ensure npm is installed
-* Start frontend with:
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The frontend can now be reached at http://localhost:5173/
-
-
 ## Features
 This simple epigram app has a few features of note: 
-* User registration: register an account by pressing the icon in the top right. Registering an account will immediately log you in
+* User registration: register an account by pressing the icon in the top right, entering valid credentials, and pressing register. Registering an account will immediately log you in
 * User authentication with password and username: if you already registered an account in the past, click the icon in the top right and log in
 * Epigram posting: to post an epigram, you must be logged into an account first. You can post an epigram as yourself (which will list your username as author), or note a different author
 * Random epigram display: Even without loggin in, the application will show a random epigram every few seconds. The refresh time can be adjusted with a dropdown, and can also be set to "never", meaning the epigram does not refresh at all. 
@@ -74,3 +51,50 @@ cd backend
 ## Notes for Reviewers
 This project was built as a short technical assignment.
 My goals were to keep a clean architecture, implement an authentication flow, and to ensure easy deployability
+
+
+## Starting the Application (No Docker)
+### Set up database
+* Ensure postgreSQL is installed
+* Run:
+```bash
+psql -U postgres
+```
+* Then:
+```postgresql
+CREATE USER epigram WITH PASSWORD 'epigram';
+CREATE DATABASE epigram OWNER epigram;
+GRANT ALL PRIVILEGES ON DATABASE epigram TO epigram;
+```
+* And exit with
+```postgresql
+\q
+```
+
+Now the database is set up, and the backend can be started
+
+### Backend
+
+```bash
+cd backend
+
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/epigram \
+SPRING_DATASOURCE_USERNAME=epigram \
+SPRING_DATASOURCE_PASSWORD=epigram \
+JWT_SECRET=super-secret-secretive-secret-for-dev-purposes-only-for-demo-purposes-only \
+./mvnw spring-boot:run
+```
+
+
+The backend can now be reached at http://localhost:8080/
+
+### Frontend
+* Ensure npm is installed
+* Start frontend with:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend can now be reached at http://localhost:5173/
