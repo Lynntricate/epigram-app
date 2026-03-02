@@ -98,7 +98,7 @@
 </script>
 
 <dialog bind:this={dialogElement} onclose={handleClose}>
-    <h3>Log in, or register an account</h3>
+    <h3>Log in, or register an account to post epigrams</h3>
     <div class="text-field-wrapper">
         <div class="input-wrapper">
             <input 

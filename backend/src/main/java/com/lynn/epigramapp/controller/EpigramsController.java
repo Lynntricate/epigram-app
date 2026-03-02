@@ -4,6 +4,7 @@ import com.lynn.epigramapp.dto.EpigramDTO;
 import com.lynn.epigramapp.model.Epigram;
 import com.lynn.epigramapp.service.EpigramService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,30 @@ public class EpigramsController {
         this.epigramService = epigramService;
     }
 
+    @GetMapping("/random")
+    public ResponseEntity<EpigramDTO> getRandom() {
+        return epigramService.getRandom()
+                .map(epigram -> new EpigramDTO(
+                        epigram.getContent(),
+                        epigram.getAuthor(),
+                        epigram.isMine()
+                ))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EpigramDTO> getById(@PathVariable Long id) {
+        return epigramService.getById(id)
+                .map(epigram -> new EpigramDTO(
+                        epigram.getContent(),
+                        epigram.getAuthor(),
+                        epigram.isMine()
+                ))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
 
     @GetMapping()
     public List<EpigramDTO> all() {
@@ -29,8 +54,6 @@ public class EpigramsController {
                 ))
                 .toList();
     }
-
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -44,5 +67,7 @@ public class EpigramsController {
                 saved.isMine()
         );
     }
+
+
 
 }

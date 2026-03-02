@@ -20,8 +20,6 @@ public class JwtService {
      * @return String token for the user
      */
     public String generateToken(User user) {
-        System.out.println(secret);
-        System.out.println("-----------------------------------");
         Key key = Keys.hmacShaKeyFor(secret.getBytes());
         return Jwts.builder()
                 .setSubject(user.getUsername())

@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,5 +79,54 @@ class EpigramsControllerTest {
                 .andExpect(jsonPath("$.content").value("Test content"))
                 .andExpect(jsonPath("$.author").value("Juno"))
                 .andExpect(jsonPath("$.mine").value(true));
+    }
+
+    @Test
+    void getRandomReturnsEpigramIfPresent() throws Exception {
+        Epigram epigram = new Epigram();
+        epigram.setContent("Hello world");
+        epigram.setAuthor("Juno");
+        epigram.setMine(true);
+
+        when(epigramService.getRandom()).thenReturn(Optional.of(epigram));
+
+        mockMvc.perform(get("/api/epigrams/random")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("Hello world"))
+                .andExpect(jsonPath("$.author").value("Juno"))
+                .andExpect(jsonPath("$.mine").value(true));
+    }
+
+    @Test
+    void getRandomReturnsEmptyIfNotPresent() throws Exception {
+        when(epigramService.getRandom()).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/epigrams/random"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getByIdReturnsEpigramWhenPresent() throws Exception {
+        Epigram epigram = new Epigram();
+        epigram.setContent("Test epigram");
+        epigram.setAuthor("Ashe");
+        epigram.setMine(false);
+
+        when(epigramService.getById(1L)).thenReturn(Optional.of(epigram));
+
+        mockMvc.perform(get("/api/epigrams/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("Test epigram"))
+                .andExpect(jsonPath("$.author").value("Ashe"))
+                .andExpect(jsonPath("$.mine").value(false));
+    }
+
+    @Test
+    void getByIdReturnsNoContentWhenNotFound() throws Exception {
+        when(epigramService.getById(1L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/epigrams/1"))
+                .andExpect(status().isNoContent());
     }
 }

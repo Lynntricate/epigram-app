@@ -12,15 +12,18 @@
 
     import type { Epigram } from "./types";
 
-    let epigram: Epigram | null;           // Currently displayed epigram 
+    let epigram: Epigram | null;    // Currently displayed epigram 
     let showCreatePopup = false;    // If true, shows the create Epigram popup component 
     let showLoginPopup = false;     // If true, shows the login/register popup component
 
+    /**
+     * Gets a random epigram from the backend, and sets the currently displayed epigram to the retrieved epigram
+     */
     async function getRandomEpigram() {
         epigram = null;
-        await new Promise(r => setTimeout(r, 700));
+        await new Promise(r => setTimeout(r, 700)); // Gives the animation time to fade out
 
-        const res = await fetch("http://localhost:8080/api/epigram");
+        const res = await fetch("http://localhost:8080/api/epigrams/random");
 
         if (res.ok && res.status !== 204) {  // make sure content is retrieved
             epigram = await res.json();
@@ -48,19 +51,36 @@
         startInterval();
     });
 
+    /**
+     * Handles pressing of the login button. This opens a dialog for registering and login in users,
+     * and logs a user out if they were logged in
+     */
     function handleClickLoginButton() {
         if (!!$auth_token|| !!$auth_username) {
+            // Log out user if they were logged in
             auth_token.set(null);
             auth_username.set(null);
         } else {
+            // If the user was not logged in, open the login/register dialog
             showLoginPopup = true;
         }
 
     }
 
+    /**
+     * Handles pressing of the refresh epigram button, by loading a new epigram and starting a new interval
+     */
     function handleClickRefreshEpigramButton() {
         getRandomEpigram();
         startInterval(); // Start interval again to cancel the previous ongoing interval
+    }
+
+    function handleClickAddEpigramButton() {
+        if ($auth_token != null) {
+            showCreatePopup = true;
+        } else {
+            showLoginPopup = true;
+        }
     }
 
 
@@ -71,8 +91,6 @@
 
 <main>
 
-    <h1>Epigrams</h1>
-
     <div class="epigram-container">
         {#if epigram}
             <div transition:fade={{duration: 500}}>
@@ -80,21 +98,6 @@
             </div>
 
         {/if}
-        <div class="epigram-options">
-            <button>
-                <RefreshCcw size={24} onclick={handleClickRefreshEpigramButton}/>
-            </button>
-            <select bind:value={choice} onchange={startInterval} class="epigram-select-time">
-                <option value={3}>every 3 seconds</option>
-                <option value={5}>every 5 seconds</option>
-                <option value={10}>every 10 seconds</option>
-                <option value={30}>every thirty seconds</option>
-                <option value={60}>every minute</option>
-                <option value={-1}>never</option>
-            </select>
-
-        </div>
-
 
     </div>
 
@@ -109,14 +112,26 @@
         {/if}
     </button>
         
-    <span title={!$auth_token ? "You must be logged in to post" : ""}>
-        <button 
-            onclick={() => showCreatePopup = true}
-            disabled={!$auth_token} 
-            >
-            Add Epigram
+    <button 
+        onclick={handleClickAddEpigramButton}
+        >
+        Add Epigram
+    </button>
+
+    <div class="epigram-options">
+        <button>
+            <RefreshCcw size={24} onclick={handleClickRefreshEpigramButton}/>
         </button>
-    </span>
+        <select bind:value={choice} onchange={startInterval} class="epigram-select-time">
+            <option value={3}>every 3 seconds</option>
+            <option value={5}>every 5 seconds</option>
+            <option value={10}>every 10 seconds</option>
+            <option value={30}>every thirty seconds</option>
+            <option value={60}>every minute</option>
+            <option value={-1}>never</option>
+        </select>
+
+    </div>
 
 
 
@@ -150,7 +165,7 @@
         align-items: center;
         justify-content: center;
         position: relative;
-        height: 10rem;
+        height: 60rem;
         width: 50rem;
         border: 1px solid transparent;
         border-radius: 8px;
@@ -159,8 +174,8 @@
     .epigram-options {
         display: flex;
         flex-direction: row;
-        position: absolute;
-        right: 0;
+        justify-content: center;
+        margin-top: 2rem;
         background: none;
         gap: 0.6rem;
     }

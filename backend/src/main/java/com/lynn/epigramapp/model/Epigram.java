@@ -20,10 +20,10 @@ public class Epigram {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length=256)
     private String content;
 
-    @Column
+    @Column(length=256)
     private String author; // Perhaps an object for author
 
     @Column(nullable = false)

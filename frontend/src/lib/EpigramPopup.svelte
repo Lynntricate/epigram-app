@@ -34,7 +34,6 @@
         const epigram = { content, author, mine };
 
         try {
-            console.log(get(auth_token));
             const response = await fetch("http://localhost:8080/api/epigrams", {
                 method: "POST",
                 headers: {
@@ -70,7 +69,7 @@
 
         <input
             type="text"
-            maxlength="1000"
+            maxlength="255"
             placeholder="An epigram..."
             class="large-input"
             bind:value={content}
@@ -133,6 +132,8 @@
         height: 2.5rem;
         align-items: center;
         gap: 5rem;
+        justify-content: space-between;
+
     }
 
     .author-post-as-wrapper {
