@@ -11,11 +11,17 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-//    @Value("${jwt.secret}")
     @Value("${JWT_SECRET}")
     private String secret;
 
+    /**
+     * Generate a token for a given user with the provided secret, which should be defined externally
+     * @param user User object for which a token is generated
+     * @return String token for the user
+     */
     public String generateToken(User user) {
+        System.out.println(secret);
+        System.out.println("-----------------------------------");
         Key key = Keys.hmacShaKeyFor(secret.getBytes());
         return Jwts.builder()
                 .setSubject(user.getUsername())

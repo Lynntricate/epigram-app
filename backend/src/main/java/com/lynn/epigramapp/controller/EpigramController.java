@@ -1,11 +1,8 @@
 package com.lynn.epigramapp.controller;
 
 import com.lynn.epigramapp.dto.EpigramDTO;
-import com.lynn.epigramapp.model.Epigram;
 import com.lynn.epigramapp.service.EpigramService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:5173") // Allow cross-origin for Svelte

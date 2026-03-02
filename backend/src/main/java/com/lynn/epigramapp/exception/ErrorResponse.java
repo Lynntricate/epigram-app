@@ -2,12 +2,15 @@ package com.lynn.epigramapp.exception;
 
 import java.time.LocalDateTime;
 
+/**
+ * Class for all error responses returned from the API
+ */
 public class ErrorResponse {
 
-    private final int status;
-    private final String message;
-    private final ErrorCode errorCode;
-    private final LocalDateTime timestamp;
+    private final int status;               // HTTP status code
+    private final String message;           // Error message
+    private final ErrorCode errorCode;      // Error code enum that specifies exact cause
+    private final LocalDateTime timestamp;  // Time of error
 
     public ErrorResponse(int status, String message, ErrorCode errorCode) {
         this.status = status;

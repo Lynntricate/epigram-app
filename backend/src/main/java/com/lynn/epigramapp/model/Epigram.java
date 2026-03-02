@@ -3,7 +3,11 @@ package com.lynn.epigramapp.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-
+/**
+ * JPA entity representing an epigram stored in the system.
+ * An epigram belongs to the user that posted it, and contains the quoted text, and
+ * its attributed author
+ */
 @Entity
 @Table(name = "epigrams") // Class name differs from table name
 public class Epigram {
@@ -59,16 +63,5 @@ public class Epigram {
     public void setMine(boolean mine) {
         this.mine = mine;
     }
-
-
-    public LocalDateTime getCreatedAt() {
-        return this.createdAt;
-    }
-
-
-
-
-
-
 
 }

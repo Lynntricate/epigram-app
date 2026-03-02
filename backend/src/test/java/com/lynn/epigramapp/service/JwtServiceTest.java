@@ -47,6 +47,7 @@ class JwtServiceTest {
                 .parseClaimsJws(token)
                 .getBody();
 
+        // Check if the JwtService's generated token refers to the user we just created
         assertEquals("Ana", claims.getSubject());
 
     }

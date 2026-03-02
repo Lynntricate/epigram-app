@@ -3,7 +3,6 @@ package com.lynn.epigramapp.controller;
 import com.lynn.epigramapp.dto.LoginDTO;
 import com.lynn.epigramapp.dto.LoginResponse;
 import com.lynn.epigramapp.dto.RegisterDTO;
-import com.lynn.epigramapp.model.User;
 import com.lynn.epigramapp.service.JwtService;
 import com.lynn.epigramapp.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;

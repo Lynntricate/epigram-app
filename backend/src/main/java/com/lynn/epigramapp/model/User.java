@@ -1,9 +1,12 @@
 package com.lynn.epigramapp.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a user stored in the system
+ * Each user has a unique username, and a password, stored as a hash
+ */
 @Entity
 @Table(name = "users") // Class name differs from table name
 public class User {

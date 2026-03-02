@@ -24,6 +24,14 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Register a new user by the provided RegisterDTO if the provided password and username are
+     * valid, and the username does not yet exist. By registering, a user is thus automatically
+     * logged in
+     *
+     * @param dto representing the to be created user
+     * @return LoginResponse object containing a jwt token and the username
+     */
     public LoginResponse register(RegisterDTO dto) {
         if (dto.username().length() < 3) {
             throw new InvalidUsernameException("Length should be > 2");
@@ -45,6 +53,13 @@ public class UserService {
         return new LoginResponse(token, savedUser.getUsername());
     }
 
+    /**
+     * Log in a user given a LoginDTO containing the password and username of a user throws
+     * appropriate exceptions when the username does not exist, or the password is incorrect
+     *
+     * @param dto representing the user to be logged in
+     * @return LoginResponse object containing a jwt token and the username
+     */
     public LoginResponse login(LoginDTO dto) {
         User user = userRepository.findByUsername(dto.username())
                 .orElseThrow(() -> new UserNotFoundException(dto.username()));
@@ -57,6 +72,13 @@ public class UserService {
         return new LoginResponse(token, user.getUsername());
     }
 
+    /**
+     * Find a user by their username. Throws an appropriate exception if the username
+     * does not exist
+     *
+     * @param username to look up
+     * @return User object, if found
+     */
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -65,7 +87,4 @@ public class UserService {
                 ));
     }
 
-    public void delete(User user) {
-        this.userRepository.delete(user);
-    }
 }
